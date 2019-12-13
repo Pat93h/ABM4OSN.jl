@@ -23,18 +23,13 @@ function publish_tweet!(
         tweet_opinion = -1.0
     end
     tweet = Tweet(tweet_opinion, length(outneighbors(graph, agent_idx)), agent_idx, tick_nr)
+    push!(tweet_list, tweet)
 
     # send tweet to each outneighbor
-    tweet_published = false
     for neighbor in outneighbors(graph, agent_idx)
-        if(tweet.weight >= agent_list[neighbor].feed_min_weight)
-            push!(agent_list[neighbor].feed, tweet)
-            tweet_published = true
-        end
+        push!(agent_list[neighbor].feed, tweet)
     end
-    if tweet_published
-        push!(tweet_list, tweet)
-    end
+
     return state, tweet_list
 end
 

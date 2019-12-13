@@ -17,6 +17,7 @@ Agent(0.0, 0.0 , 0.0, 0.0, true, 0, Tweet[], Tweet[], Tweet[])
 See also: [Tweet](@ref), [generate_opinion](@ref), [generate_inlinc_interact](@ref), [generate_check_regularity](@ref)
 """
 mutable struct Agent
+    id::Int64
     opinion::Float64
     inclin_interact::Float64
     perceiv_publ_opinion::Float64
@@ -24,10 +25,9 @@ mutable struct Agent
     active::Bool
     inactive_ticks::Int16
     feed::Array{Tweet, 1}
-    feed_min_weight::Float64
     liked_tweets::Array{Tweet, 1}
     retweeted_tweets::Array{Tweet, 1}
-    function Agent(opinion, inclin_interact, check_regularity)
+    function Agent(id, opinion, inclin_interact, check_regularity)
         # check if opinion value is valid
         if opinion < -1 || opinion > 1
             error("invalid opinion value")
@@ -37,6 +37,7 @@ mutable struct Agent
             error("invalid value for inclination to interact")
         end
         new(
+            id,
             opinion,
             inclin_interact,
             opinion,
@@ -44,7 +45,6 @@ mutable struct Agent
             true,
             0,
             Array{Tweet, 1}(undef, 0),
-            0,
             Array{Tweet, 1}(undef, 0),
             Array{Tweet, 1}(undef, 0)
         )

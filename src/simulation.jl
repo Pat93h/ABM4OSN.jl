@@ -25,7 +25,9 @@ function tick!(
             like(state, agent_idx, config)
             retweet!(state, agent_idx, config)
             drop_input!(state, agent_idx, config)
-            add_input!(state, agent_idx, config)
+            if indegree(state[1], agent_idx) / nv(state[1]) * 2 < rand()
+                add_input!(state, agent_idx, tweet_list, config)
+            end
             inclin_interact = deepcopy(this_agent.inclin_interact)
             while inclin_interact > 0
                 if rand() < inclin_interact
@@ -77,12 +79,14 @@ function simulate(
     print("Current Tick: 0")
     for i in 1:config.simulation.n_iter
         print('\r')
-        print("Current Tick: $i, current AVG agents connection count::" * string(round(ne(state[1])/nv(state[1]))) * ", max indegree: " * string(maximum(indegree(state[1]))) * ", current Tweets: " * string(length(tweet_list)))
+        current_network = deepcopy(state[1])
+        rem_vertices!(current_network, [agent.id for agent in state[2] if !agent.active])
+        print("Current Tick: $i, current AVG agents connection count::" * string(round(ne(current_network)/nv(current_network))) * ", max outdegree: " * string(maximum(outdegree(current_network))) * ", mean outdegree: " * string(mean(outdegree(current_network))) * ", current Tweets: " * string(length(tweet_list)))
         append!(df, tick!(state, tweet_list, i, config))
-        if i % ceil(config.simulation.n_iter / 10) == 0
-            print(".")
-            push!(graph_list, deepcopy(state[1]))
-        end
+        # if i % ceil(config.simulation.n_iter / 10) == 0
+        #     print(".")
+        #     push!(graph_list, deepcopy(state[1]))
+        # end
 
     end
 
@@ -91,13 +95,14 @@ function simulate(
         Weight = [t.weight for t in tweet_list],
         Source_Agent = [t.source_agent for t in tweet_list],
         Published_At = [t.published_at for t in tweet_list],
+        Seen = [t.seen for t in tweet_list],
         Likes = [t.like_count for t in tweet_list],
         Retweets = [t.retweet_count for t in tweet_list]
     )
 
-    print("\nFinished simulation run with the following specifications:\n $config")
+    print("\n---\nFinished simulation run with the following specifications:\n $config\n---\n")
 
-    return (df, tweet_df, graph_list), state, init_state
+    return (df, tweet_df, graph_list), state, init_state, tweet_list
 end
 
 # suppress output of include()
